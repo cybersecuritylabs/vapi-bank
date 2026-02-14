@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureVault — API Gateway</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'SF Mono','Fira Code','Inter',monospace;background:#0a0a0a;color:#e2e8f0;min-height:100vh}
+.topbar{background:#111;border-bottom:1px solid #222;padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:1rem;font-weight:700;color:#10b981;display:flex;align-items:center;gap:0.5rem}
+.topbar h1 svg{width:24px;height:24px}
+.container{max-width:800px;margin:2rem auto;padding:0 1.5rem}
+.card{background:#111;border:1px solid #222;border-radius:8px;padding:1.25rem;margin-bottom:1rem}
+.card h2{font-size:0.875rem;font-weight:600;color:#10b981;margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.05em}
+.token-display{background:#0a0a0a;border:1px solid #222;border-radius:6px;padding:0.75rem;word-break:break-all;font-size:0.75rem;color:#94a3b8;margin-top:0.75rem}
+.token-display .label{color:#10b981;font-size:0.6875rem;margin-bottom:0.25rem;text-transform:uppercase;display:block}
+.key-row{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #1a1a1a;font-size:0.8125rem}
+.key-row:last-child{border-bottom:none}
+.status-active{color:#10b981}.status-revoked{color:#ef4444}
+.form-row{margin-bottom:1rem}
+.form-row label{display:block;font-size:0.75rem;color:#64748b;margin-bottom:0.25rem;text-transform:uppercase}
+.form-row input{width:100%;padding:0.5rem 0.75rem;background:#0a0a0a;border:1px solid #333;border-radius:6px;color:#e2e8f0;font-size:0.875rem;font-family:inherit}
+.form-row input:focus{outline:none;border-color:#10b981;box-shadow:0 0 0 2px rgba(16,185,129,0.2)}
+.btn{padding:0.5rem 1rem;border:none;border-radius:6px;font-size:0.8125rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn-green{background:#10b981;color:#000;width:100%}.btn-green:hover{background:#059669}
+.btn-sm{padding:0.375rem 0.75rem;font-size:0.75rem}
+.btn-red{background:#ef4444;color:#fff}.btn-red:hover{background:#dc2626}
+.login-wrapper{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#050505}
+.login-card{background:#111;border:1px solid #222;border-radius:12px;padding:2.5rem;max-width:400px;width:100%}
+.login-card h1{text-align:center;font-size:1.25rem;color:#10b981;margin-bottom:0.25rem}
+.login-card p{text-align:center;color:#64748b;font-size:0.8125rem;margin-bottom:2rem}
+.login-card .logo{text-align:center;margin-bottom:1.5rem}
+.login-card .logo svg{width:48px;height:48px}
+.alert{padding:0.75rem;border-radius:6px;font-size:0.8125rem;margin-bottom:1rem;display:none}
+.alert-error{background:#1c0a0a;color:#ef4444;border:1px solid #7f1d1d}
+.hidden{display:none!important}
+.flag-banner{background:linear-gradient(135deg,#10b981,#059669);color:#000;padding:1rem;border-radius:8px;margin-bottom:1rem;font-size:0.875rem;word-break:break-all}
+.flag-banner strong{display:block;margin-bottom:0.25rem;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em}
+</style>
+</head>
+<body>
+<div id="loginView" class="login-wrapper">
+  <div class="login-card">
+    <div class="logo"><svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="#111"/><path d="M24 14v6M20 24h8M24 28v6" stroke="#10b981" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="24" r="12" fill="none" stroke="#10b981" stroke-width="1.5"/><circle cx="24" cy="24" r="4" fill="#10b981"/></svg></div>
+    <h1>SecureVault</h1>
+    <p>API Gateway Console</p>
+    <div id="loginAlert" class="alert alert-error"></div>
+    <form id="loginForm">
+      <div class="form-row"><label>Username</label><input type="text" id="username" required></div>
+      <div class="form-row"><label>Password</label><input type="password" id="password" required></div>
+      <button type="submit" class="btn btn-green">Authenticate</button>
+    </form>
+  </div>
+</div>
+
+<div id="appView" class="hidden">
+  <div class="topbar">
+    <h1><svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg> SecureVault</h1>
+    <div>
+      <span style="color:#64748b;font-size:0.75rem;" id="userRole">role: user</span>
+      <button class="btn btn-red btn-sm" style="margin-left:0.75rem" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="container">
+    <div id="flagBanner"></div>
+    <div class="card">
+      <h2>Session Token</h2>
+      <p style="color:#64748b;font-size:0.8125rem;">Your current JWT authentication token:</p>
+      <div class="token-display"><span class="label">Bearer Token</span><span id="tokenDisplay">—</span></div>
+    </div>
+    <div class="card">
+      <h2>API Keys</h2>
+      <div id="keysContainer"></div>
+    </div>
+    <div class="card">
+      <h2>Profile</h2>
+      <div id="profileInfo" style="font-size:0.8125rem;color:#94a3b8;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let authToken = null;
+
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const res = await fetch('/api/auth/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:$('#username').value,password:$('#password').value})});
+  const d = await res.json();
+  if (!res.ok) { $('#loginAlert').textContent=d.error;$('#loginAlert').style.display='block';return; }
+  authToken = d.token;
+  $('#loginView').classList.add('hidden');
+  $('#appView').classList.remove('hidden');
+  $('#tokenDisplay').textContent = authToken;
+  $('#userRole').textContent = 'role: ' + d.user.role;
+  loadProfile(); loadKeys();
+});
+
+async function loadProfile() {
+  const res = await fetch('/api/user/profile', {headers:{'Authorization':'Bearer '+authToken}});
+  const d = await res.json();
+  $('#profileInfo').innerHTML = `Username: <strong>${d.username}</strong><br>Name: <strong>${d.name}</strong><br>Role: <strong>${d.role}</strong>`;
+}
+
+async function loadKeys() {
+  const res = await fetch('/api/user/keys', {headers:{'Authorization':'Bearer '+authToken}});
+  const d = await res.json();
+  $('#keysContainer').innerHTML = d.keys.map(k =>
+    `<div class="key-row"><span>${k.name} <span style="color:#64748b">(${k.prefix})</span></span><span class="status-${k.status}">${k.status}</span></div>`
+  ).join('');
+}
+
+function doLogout() { authToken=null;$('#appView').classList.add('hidden');$('#loginView').classList.remove('hidden');$('#loginAlert').style.display='none'; }
+</script>
+</body>
+</html>

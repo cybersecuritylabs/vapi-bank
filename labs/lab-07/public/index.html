@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataStream — Analytics</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.topbar{background:#1e293b;border-bottom:1px solid #334155;padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:1.125rem;font-weight:700;color:#2dd4bf;display:flex;align-items:center;gap:0.5rem}
+.topbar h1 svg{width:24px;height:24px}
+.container{max-width:800px;margin:2rem auto;padding:0 1.5rem}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+.card h2{font-size:1rem;font-weight:600;color:#2dd4bf;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem}
+.card h2 svg{width:18px;height:18px}
+.report-row{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid #334155;font-size:0.875rem}
+.report-row:last-child{border-bottom:none}
+.report-type{background:#134e4a;color:#2dd4bf;padding:0.125rem 0.5rem;border-radius:999px;font-size:0.6875rem;font-weight:600}
+.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.metric{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:1rem;text-align:center}
+.metric .label{font-size:0.75rem;color:#94a3b8;margin-bottom:0.25rem}
+.metric .value{font-size:1.5rem;font-weight:700;color:#2dd4bf}
+.form-row{margin-bottom:1rem}
+.form-row label{display:block;font-size:0.8125rem;color:#94a3b8;margin-bottom:0.25rem}
+.form-row input{width:100%;padding:0.5rem 0.75rem;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-size:0.875rem;font-family:inherit}
+.form-row input:focus{outline:none;border-color:#2dd4bf;box-shadow:0 0 0 2px rgba(45,212,191,0.2)}
+.btn{padding:0.5rem 1rem;border:none;border-radius:8px;font-size:0.875rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn-teal{background:#14b8a6;color:#000;width:100%}.btn-teal:hover{background:#0d9488}
+.btn-sm{padding:0.375rem 0.75rem;font-size:0.75rem}
+.btn-danger{background:#ef4444;color:#fff}
+.alert{padding:0.75rem;border-radius:8px;font-size:0.8125rem;margin-bottom:1rem;display:none}
+.alert-error{background:#1c0a0a;color:#ef4444;border:1px solid #7f1d1d}
+.login-wrapper{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#020617}
+.login-card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:2.5rem;max-width:400px;width:100%}
+.login-card h1{text-align:center;font-size:1.375rem;color:#2dd4bf;margin-bottom:0.25rem}
+.login-card p{text-align:center;color:#94a3b8;font-size:0.875rem;margin-bottom:2rem}
+.login-card .logo{text-align:center;margin-bottom:1.5rem}
+.login-card .logo svg{width:48px;height:48px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="loginView" class="login-wrapper">
+  <div class="login-card">
+    <div class="logo"><svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="14" fill="#0d9488"/><polyline points="8,36 16,24 24,30 32,16 40,20" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h1>DataStream</h1>
+    <p>Analytics Platform</p>
+    <div id="loginAlert" class="alert alert-error"></div>
+    <form id="loginForm">
+      <div class="form-row"><label>Username</label><input type="text" id="username" required></div>
+      <div class="form-row"><label>Password</label><input type="password" id="password" required></div>
+      <button type="submit" class="btn btn-teal">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<div id="appView" class="hidden">
+  <div class="topbar">
+    <h1><svg viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="2"><polyline points="4,18 8,12 12,15 16,8 20,10"/></svg> DataStream</h1>
+    <button class="btn btn-danger btn-sm" onclick="doLogout()">Logout</button>
+  </div>
+  <div class="container">
+    <div class="card">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg> Reports</h2>
+      <div id="reportsContainer"></div>
+    </div>
+    <div class="card">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Quick Metrics</h2>
+      <div class="metric-grid">
+        <div class="metric"><div class="label">Page Views</div><div class="value">15.2K</div></div>
+        <div class="metric"><div class="label">Sessions</div><div class="value">8.9K</div></div>
+        <div class="metric"><div class="label">Conversions</div><div class="value">342</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const res = await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:$('#username').value,password:$('#password').value})});
+  const d = await res.json();
+  if (!res.ok) {$('#loginAlert').textContent=d.error;$('#loginAlert').style.display='block';return;}
+  $('#loginView').classList.add('hidden');$('#appView').classList.remove('hidden');
+  loadReports();
+});
+
+async function loadReports() {
+  const res = await fetch('/api/reports');
+  const d = await res.json();
+  $('#reportsContainer').innerHTML = d.reports.map(r =>
+    `<div class="report-row"><span>${r.title}</span><div><span class="report-type">${r.type}</span> <span style="color:#64748b;font-size:0.75rem;margin-left:0.5rem">${r.date}</span></div></div>`
+  ).join('');
+}
+
+function doLogout() { fetch('/api/auth/logout',{method:'POST'}).then(()=>{$('#appView').classList.add('hidden');$('#loginView').classList.remove('hidden');}); }
+</script>
+</body>
+</html>

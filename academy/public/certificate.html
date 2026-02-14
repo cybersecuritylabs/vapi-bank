@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V-API-Bank Academy — Certificate</title>
+  <link rel="stylesheet" href="/css/academy.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <svg class="logo-icon" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="#2563eb"/><path d="M14 16h20v3H14zM14 22h16v3H14zM14 28h12v3H14z" fill="#fff" opacity="0.9"/><path d="M30 26a6 6 0 1 1 0 12 6 6 0 0 1 0-12z" fill="#fff"/><path d="M28 32h4M30 30v4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div><h2>V-API-Bank</h2><span>Academy</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/index.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="/certificate.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+        Certificate
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-details">
+          <div class="user-name" id="userName">User</div>
+          <div class="user-email" id="userEmail">user@example.com</div>
+        </div>
+        <button class="btn-logout" onclick="logout()" title="Sign out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="certContent">
+    <div class="loading"><div class="spinner"></div> Loading certificate status...</div>
+  </main>
+</div>
+
+<script>
+const API = '';
+const token = localStorage.getItem('vbank_token');
+const user = JSON.parse(localStorage.getItem('vbank_user') || '{}');
+if (!token) window.location.href = '/login.html';
+
+document.getElementById('userName').textContent = user.username || 'User';
+document.getElementById('userEmail').textContent = user.email || '';
+document.getElementById('userAvatar').textContent = (user.username || 'U')[0].toUpperCase();
+
+function logout() {
+  localStorage.removeItem('vbank_token');
+  localStorage.removeItem('vbank_user');
+  window.location.href = '/login.html';
+}
+
+async function loadCertificate() {
+  try {
+    const res = await fetch(`${API}/api/certificates`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+
+    if (data.hasCertificate) {
+      renderCertificate(data.certificate);
+    } else if (data.eligible) {
+      document.getElementById('certContent').innerHTML = `
+        <div class="page-header"><h1>Certificate</h1><p>You have completed all labs!</p></div>
+        <div class="text-center" style="padding:2rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="width:64px;height:64px;margin-bottom:1rem;"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+          <h2 style="color:var(--gray-900);margin-bottom:0.5rem;">Congratulations!</h2>
+          <p style="color:var(--gray-500);margin-bottom:1.5rem;">You have completed all ${data.totalCount} labs. Generate your certificate now.</p>
+          <button onclick="generateCert()" class="btn btn-success btn-lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Generate Certificate
+          </button>
+        </div>`;
+    } else {
+      document.getElementById('certContent').innerHTML = `
+        <div class="page-header"><h1>Certificate</h1><p>Complete all labs to earn your certificate</p></div>
+        <div class="cert-not-eligible">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:64px;height:64px;"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+          <h2>Not Yet Eligible</h2>
+          <p>You've completed ${data.completedCount} of ${data.totalCount} labs. Keep going!</p>
+          <div class="progress-bar-wrapper mt-2" style="max-width:300px;margin:1rem auto;">
+            <div class="progress-bar-fill" style="width:${Math.round((data.completedCount/data.totalCount)*100)}%"></div>
+          </div>
+          <a href="/index.html" class="btn btn-primary mt-2">Continue Training</a>
+        </div>`;
+    }
+  } catch (err) {
+    console.error(err);
+    document.getElementById('certContent').innerHTML = '<p style="color:var(--danger);padding:2rem;">Failed to load certificate status.</p>';
+  }
+}
+
+function renderCertificate(cert) {
+  const date = new Date(cert.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('certContent').innerHTML = `
+    <div class="page-header">
+      <h1>Your Certificate</h1>
+      <p>Print or save your certificate of completion</p>
+    </div>
+    <div style="text-align:right;margin-bottom:1rem;">
+      <button onclick="window.print()" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print Certificate
+      </button>
+    </div>
+    <div class="certificate-wrapper">
+      <div class="certificate">
+        <div class="cert-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4" stroke-width="2"/></svg>
+        </div>
+        <h1>V-API-Bank Academy</h1>
+        <div class="cert-subtitle">Certificate of Completion</div>
+        <p style="color:var(--gray-500);margin-bottom:0.5rem;">This certifies that</p>
+        <div class="cert-name">${cert.username}</div>
+        <div class="cert-description">
+          has successfully completed all ${cert.labsCompleted} API security labs in the V-API-Bank Academy training program, demonstrating proficiency in identifying and exploiting real-world API vulnerabilities.
+        </div>
+        <div class="cert-details">
+          <div>Issued<br><strong>${date}</strong></div>
+          <div>Certificate ID<br><strong>${cert.id}</strong></div>
+          <div>Labs Completed<br><strong>${cert.labsCompleted}</strong></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function generateCert() {
+  try {
+    const res = await fetch(`${API}/api/certificates/generate`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    renderCertificate(data.certificate);
+  } catch (err) {
+    alert('Failed to generate certificate: ' + err.message);
+  }
+}
+
+loadCertificate();
+</script>
+</body>
+</html>

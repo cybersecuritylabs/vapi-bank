@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevHub — Developer Platform</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'JetBrains Mono','Fira Code','SF Mono',monospace;background:#0d1117;color:#c9d1d9;min-height:100vh}
+.topbar{background:#161b22;border-bottom:1px solid #30363d;padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:1rem;font-weight:600;color:#58a6ff;display:flex;align-items:center;gap:0.5rem}
+.topbar h1 svg{width:22px;height:22px}
+.container{max-width:860px;margin:2rem auto;padding:0 1.5rem}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin-bottom:1rem}
+.card h2{font-size:0.9375rem;color:#58a6ff;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem}
+.card h2 svg{width:16px;height:16px}
+.repo-list{list-style:none}
+.repo-item{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0;border-bottom:1px solid #21262d}
+.repo-item:last-child{border-bottom:none}
+.repo-name{color:#58a6ff;font-weight:600;font-size:0.875rem}
+.repo-meta{display:flex;gap:1rem;font-size:0.75rem;color:#8b949e}
+.badge{display:inline-block;padding:0.125rem 0.5rem;border-radius:999px;font-size:0.6875rem;font-weight:600}
+.badge-private{background:rgba(218,138,25,0.15);color:#d29922;border:1px solid rgba(218,138,25,0.3)}
+.badge-public{background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid rgba(63,185,80,0.3)}
+.badge-role{background:rgba(88,166,255,0.15);color:#58a6ff;border:1px solid rgba(88,166,255,0.3)}
+.form-row{margin-bottom:1rem}
+.form-row label{display:block;font-size:0.75rem;color:#8b949e;margin-bottom:0.375rem;text-transform:uppercase;letter-spacing:0.05em}
+.form-row input,.form-row textarea{width:100%;padding:0.5rem 0.75rem;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:0.875rem;font-family:inherit}
+.form-row textarea{min-height:120px;resize:vertical}
+.form-row input:focus,.form-row textarea:focus{outline:none;border-color:#58a6ff;box-shadow:0 0 0 3px rgba(88,166,255,0.15)}
+.btn{padding:0.5rem 1rem;border:none;border-radius:6px;font-size:0.8125rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn-green{background:#238636;color:#fff}.btn-green:hover{background:#2ea043}
+.btn-sm{padding:0.375rem 0.5rem;font-size:0.6875rem}
+.btn-danger{background:#da3633;color:#fff}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#c9d1d9}.btn-outline:hover{border-color:#58a6ff}
+.alert{padding:0.75rem;border-radius:6px;font-size:0.8125rem;margin-bottom:1rem;display:none}
+.alert-error{background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3)}
+.alert-success{background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3)}
+.login-wrapper{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0d1117}
+.login-card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:2.5rem;max-width:380px;width:100%}
+.login-card h1{text-align:center;font-size:1.25rem;color:#58a6ff;margin-bottom:0.25rem}
+.login-card p{text-align:center;color:#8b949e;font-size:0.8125rem;margin-bottom:2rem}
+.login-card .logo{text-align:center;margin-bottom:1.5rem}
+.login-card .logo svg{width:48px;height:48px}
+.hidden{display:none!important}
+.flag-banner{background:linear-gradient(135deg,#238636,#2ea043);color:#fff;padding:1rem;border-radius:8px;margin-bottom:1rem;font-size:0.875rem;word-break:break-all;border:1px solid #3fb950}
+.flag-banner strong{display:block;margin-bottom:0.25rem;font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.1em;opacity:0.7}
+.console-box{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:1rem;font-size:0.8125rem;white-space:pre-wrap;max-height:300px;overflow-y:auto;color:#8b949e;margin-top:0.5rem}
+.console-box .response{color:#3fb950}
+.console-box .error{color:#f85149}
+.tabs{display:flex;border-bottom:1px solid #30363d;margin-bottom:1rem}
+.tab{padding:0.5rem 1rem;font-size:0.8125rem;font-weight:500;cursor:pointer;color:#8b949e;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab.active{color:#58a6ff;border-bottom-color:#58a6ff}
+</style>
+</head>
+<body>
+<div id="loginView" class="login-wrapper">
+  <div class="login-card">
+    <div class="logo"><svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="14" fill="#161b22" stroke="#30363d" stroke-width="2"/><path d="M24 8L14 18l10 10 10-10z" fill="none" stroke="#58a6ff" stroke-width="2"/><path d="M14 26l10 10 10-10" fill="none" stroke="#58a6ff" stroke-width="2" opacity="0.5"/></svg></div>
+    <h1>&lt;DevHub/&gt;</h1>
+    <p>Developer Platform</p>
+    <div id="loginAlert" class="alert"></div>
+    <form id="loginForm">
+      <div class="form-row"><label>Username</label><input type="text" id="username" value="developer" required></div>
+      <div class="form-row"><label>Password</label><input type="password" id="password" value="dev2024" required></div>
+      <button type="submit" class="btn btn-green" style="width:100%">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<div id="appView" class="hidden">
+  <div class="topbar">
+    <h1><svg viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> DevHub</h1>
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <span class="badge badge-role" id="userRole">developer</span>
+      <button class="btn btn-danger btn-sm" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="container">
+    <div id="flagBanner"></div>
+
+    <div class="card">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 3v18"/></svg> Your Repositories</h2>
+      <ul class="repo-list" id="repoList"></ul>
+    </div>
+
+    <div class="card">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> GraphQL Console</h2>
+      <div class="tabs">
+        <button class="tab active" onclick="setGqlTab('query')">Query</button>
+        <button class="tab" onclick="setGqlTab('mutation')">Mutation</button>
+        <button class="tab" onclick="setGqlTab('introspection')">Introspection</button>
+      </div>
+      <div class="form-row">
+        <textarea id="gqlInput" placeholder="Enter GraphQL query...">{ me { id username role repos } }</textarea>
+      </div>
+      <button class="btn btn-green" onclick="runQuery()">Execute Query</button>
+      <div class="console-box" id="gqlOutput">// Response will appear here...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let currentUser = null;
+
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: $('#username').value, password: $('#password').value }) });
+  const d = await res.json();
+  if (!res.ok) { $('#loginAlert').className = 'alert alert-error'; $('#loginAlert').textContent = d.error; $('#loginAlert').style.display = 'block'; return; }
+  currentUser = d.user;
+  $('#loginView').classList.add('hidden');
+  $('#appView').classList.remove('hidden');
+  $('#userRole').textContent = d.user.role;
+  loadRepos();
+});
+
+async function loadRepos() {
+  const res = await fetch('/api/graphql', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: '{ repos { id name stars language isPrivate flag } }' }) });
+  const d = await res.json();
+  if (d.data && d.data.repos) {
+    $('#repoList').innerHTML = d.data.repos.map(r =>
+      `<li class="repo-item"><div><span class="repo-name">${r.name}</span></div><div class="repo-meta"><span>${r.language}</span><span>★ ${r.stars}</span><span class="badge ${r.isPrivate ? 'badge-private' : 'badge-public'}">${r.isPrivate ? 'Private' : 'Public'}</span></div></li>`
+    ).join('');
+    const flagRepo = d.data.repos.find(r => r.flag);
+    if (flagRepo) {
+      $('#flagBanner').innerHTML = `<div class="flag-banner"><strong>Flag Captured</strong>${flagRepo.flag}</div>`;
+    }
+  }
+  /* Re-check profile for role updates */
+  const pRes = await fetch('/api/profile');
+  const pData = await pRes.json();
+  if (pRes.ok) {
+    currentUser = pData.user;
+    $('#userRole').textContent = pData.user.role;
+  }
+}
+
+const templates = {
+  query: '{ me { id username role repos } }',
+  mutation: 'mutation { promoteUser(userId: "dev-001", role: "admin") { id username role repos } }',
+  introspection: '{ __schema { types { name kind fields { name type { name kind } } } } }'
+};
+
+function setGqlTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  $('#gqlInput').value = templates[tab] || '';
+}
+
+async function runQuery() {
+  const query = $('#gqlInput').value.trim();
+  if (!query) return;
+  try {
+    const res = await fetch('/api/graphql', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
+    const d = await res.json();
+    $('#gqlOutput').innerHTML = `<span class="response">${JSON.stringify(d, null, 2)}</span>`;
+    loadRepos();
+  } catch (err) {
+    $('#gqlOutput').innerHTML = `<span class="error">${err.message}</span>`;
+  }
+}
+
+function doLogout() { fetch('/api/auth/logout', { method: 'POST' }).then(() => { location.reload(); }); }
+</script>
+</body>
+</html>

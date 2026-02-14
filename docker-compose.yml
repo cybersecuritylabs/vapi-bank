@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  academy:
+    build: ./academy
+    container_name: vbank-academy
+    ports:
+      - "3000:3000"
+    volumes:
+      - academy-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=vbank-academy-jwt-s3cr3t-k3y-2024
+      - PORT=3000
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+  lab-01:
+    build: ./labs/lab-01
+    container_name: vbank-lab-01
+    ports:
+      - "9001:9001"
+    environment:
+      - PORT=9001
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+  lab-02:
+    build: ./labs/lab-02
+    container_name: vbank-lab-02
+    ports:
+      - "9002:9002"
+    environment:
+      - PORT=9002
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+  lab-03:
+    build: ./labs/lab-03
+    container_name: vbank-lab-03
+    ports:
+      - "9003:9003"
+    environment:
+      - PORT=9003
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+  lab-04:
+    build: ./labs/lab-04
+    container_name: vbank-lab-04
+    ports:
+      - "9004:9004"
+    environment:
+      - PORT=9004
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+  lab-05:
+    build: ./labs/lab-05
+    container_name: vbank-lab-05
+    ports:
+      - "9005:9005"
+    environment:
+      - PORT=9005
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+  lab-06:
+    build: ./labs/lab-06
+    container_name: vbank-lab-06
+    ports:
+      - "9006:9006"
+    environment:
+      - PORT=9006
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+  lab-07:
+    build: ./labs/lab-07
+    container_name: vbank-lab-07
+    ports:
+      - "9007:9007"
+    environment:
+      - PORT=9007
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+  lab-08:
+    build: ./labs/lab-08
+    container_name: vbank-lab-08
+    ports:
+      - "9008:9008"
+    environment:
+      - PORT=9008
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+  lab-09:
+    build: ./labs/lab-09
+    container_name: vbank-lab-09
+    ports:
+      - "9009:9009"
+    environment:
+      - PORT=9009
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+  lab-10:
+    build: ./labs/lab-10
+    container_name: vbank-lab-10
+    ports:
+      - "9010:9010"
+    environment:
+      - PORT=9010
+    restart: unless-stopped
+    networks:
+      - vbank-net
+
+volumes:
+  academy-data:
+
+networks:
+  vbank-net:
+    driver: bridge

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V-API-Bank Academy — Sign In</title>
+  <link rel="stylesheet" href="/css/academy.css">
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg class="logo-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="48" height="48" rx="12" fill="#2563eb"/>
+        <path d="M14 16h20v3H14zM14 22h16v3H14zM14 28h12v3H14z" fill="#fff" opacity="0.9"/>
+        <path d="M30 26a6 6 0 1 1 0 12 6 6 0 0 1 0-12z" fill="#fff"/>
+        <path d="M28 32h4M30 30v4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <h1>V-API-Bank Academy</h1>
+      <p>API Security Training Platform</p>
+    </div>
+
+    <div id="alertBox" class="alert alert-error"></div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="loginEmail">Email address</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Sign In
+      </button>
+      <div class="auth-footer">
+        Don't have an account? <a href="#" id="showRegister">Create one</a>
+      </div>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" class="hidden">
+      <div class="form-group">
+        <label for="regUsername">Username</label>
+        <input type="text" id="regUsername" placeholder="Choose a username" required>
+      </div>
+      <div class="form-group">
+        <label for="regEmail">Email address</label>
+        <input type="email" id="regEmail" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="regPassword">Password</label>
+        <input type="password" id="regPassword" placeholder="Min. 6 characters" required minlength="6">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        Create Account
+      </button>
+      <div class="auth-footer">
+        Already have an account? <a href="#" id="showLogin">Sign in</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const API = '';
+const $ = (sel) => document.querySelector(sel);
+
+if (localStorage.getItem('vbank_token')) {
+  window.location.href = '/index.html';
+}
+
+$('#showRegister').addEventListener('click', (e) => {
+  e.preventDefault();
+  $('#loginForm').classList.add('hidden');
+  $('#registerForm').classList.remove('hidden');
+  hideAlert();
+});
+
+$('#showLogin').addEventListener('click', (e) => {
+  e.preventDefault();
+  $('#registerForm').classList.add('hidden');
+  $('#loginForm').classList.remove('hidden');
+  hideAlert();
+});
+
+function showAlert(msg, type = 'error') {
+  const box = $('#alertBox');
+  box.textContent = msg;
+  box.className = `alert alert-${type}`;
+  box.style.display = 'block';
+}
+
+function hideAlert() {
+  $('#alertBox').style.display = 'none';
+}
+
+$('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideAlert();
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: $('#loginEmail').value,
+        password: $('#loginPassword').value,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    localStorage.setItem('vbank_token', data.token);
+    localStorage.setItem('vbank_user', JSON.stringify(data.user));
+    window.location.href = '/index.html';
+  } catch (err) {
+    showAlert(err.message);
+  }
+});
+
+$('#registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideAlert();
+  try {
+    const res = await fetch(`${API}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: $('#regUsername').value,
+        email: $('#regEmail').value,
+        password: $('#regPassword').value,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
+    localStorage.setItem('vbank_token', data.token);
+    localStorage.setItem('vbank_user', JSON.stringify(data.user));
+    window.location.href = '/index.html';
+  } catch (err) {
+    showAlert(err.message);
+  }
+});
+</script>
+</body>
+</html>
