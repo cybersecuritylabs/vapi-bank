@@ -189,7 +189,7 @@ docker-compose up --build
 
 ---
 
-## 🎓 **HOW TO LEARN**
+##  **HOW TO LEARN**
 
 <div align="center">
 
