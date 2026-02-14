@@ -325,13 +325,13 @@ graph LR
 
 ---
 
-## 🛠️ **TECH STACK**
+##  **TECH STACK**
 
 <table>
 <tr>
 <td width="33%" align="center" valign="top">
 
-### 🎓 **Academy Platform**
+###  **Academy Platform**
 
 ```
 ┌─────────────────┐
@@ -349,7 +349,7 @@ Focus on security, not frameworks.
 </td>
 <td width="33%" align="center" valign="top">
 
-### ⚔️ **Lab Applications**
+###  **Lab Applications**
 
 ```
 ┌─────────────────┐
@@ -367,7 +367,7 @@ Real-world API patterns.
 </td>
 <td width="33%" align="center" valign="top">
 
-### 🐳 **Infrastructure**
+###  **Infrastructure**
 
 ```
 ┌─────────────────┐
@@ -388,7 +388,7 @@ One command to rule them all.
 
 ---
 
-## 🎖️ **SKILL PROGRESSION**
+##  **SKILL PROGRESSION**
 
 <div align="center">
 
@@ -458,7 +458,7 @@ One command to rule them all.
 
 ---
 
-## 🤝 **CONTRIBUTING**
+##  **CONTRIBUTING**
 
 We welcome contributions that improve the learning experience:
 
@@ -476,7 +476,7 @@ We welcome contributions that improve the learning experience:
 
 ---
 
-## 📜 **LICENSE**
+##  **LICENSE**
 
 ```
 MIT License — Educational and Training Purposes Only
