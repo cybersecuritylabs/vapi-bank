@@ -519,6 +519,6 @@ development. By using this platform, you acknowledge that:
 
 ---
 
-<sub>Built with 💙 by Cyberlabs | Star ⭐ this repo if it helps you level up</sub>
+<sub>Built with 💙 by Cybersecuritylabs | Star ⭐ this repo if it helps you level up</sub>
 
 </div>
